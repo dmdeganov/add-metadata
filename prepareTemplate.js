@@ -28,10 +28,10 @@ const dataTemplate = folders.reduce((acc, folder) => {
     ...acc,
     [folder]:
       amountOfPhotos <= 5
-        ? { titles: [""], descriptions: [""], keywords: [""] }
+        ? { titles: [''], descriptions: [''], keywords: [''] }
         : {
-            titles: new Array(titlesQuantity).fill(""),
-            keywords: new Array(keywordsQuantity).fill(""),
+            titles: new Array(titlesQuantity).fill(''),
+            keywords: new Array(keywordsQuantity).fill(''),
           },
   };
 }, {});
