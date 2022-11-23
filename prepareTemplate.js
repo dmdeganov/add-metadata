@@ -1,4 +1,4 @@
-const { readdirSync, writeFile } = require("fs");
+const { readdirSync, writeFile, existsSync } = require("fs");
 const path = require("path");
 const createTagsFromTxt = require('./createTagsFromTxt');
 
@@ -12,9 +12,15 @@ const getFoldersList = (source) =>
     .filter((name) => name !== "add-metadata" && name !== ".idea");
 
 const folders = getFoldersList(photosDirectory);
+folders.forEach(folder => {
+  if (!existsSync(`${photosDirectory}/${folder}.txt`)) {
+    console.log(`file ${folder}.txt doesn't exist`)
+    error = true
+  }
+})
 
 
-const dataTemplate = folders.reduce((acc, folder) => {
+const dataTemplate = !error && folders.reduce((acc, folder) => {
   const folderPath = path.resolve(__dirname, "..", folder);
   const amountOfPhotos = readdirSync(folderPath).length;
   const patterns = {
@@ -40,8 +46,9 @@ const dataTemplate = folders.reduce((acc, folder) => {
     keywordsQuantity: folderTags.keywords.length,
   };
   for (const tag in folderTagsQuantity){
-    if (folderTagsQuantity.tag !== patternTagsQuantity.tag){
-      console.log(`${folder} has ${folderTagsQuantity.tag.replace('Quantity', '')} ${tag}, but must have ${patternTagsQuantity.tag}`)
+    if (folderTagsQuantity[tag] !== patternTagsQuantity[tag]){
+      console.log(`folder ${folder} has ${folderTagsQuantity[tag]} ${tag.replace('Quantity', '')}, but must have ${patternTagsQuantity[tag]}`)
+      error = true
     }
   }
 
