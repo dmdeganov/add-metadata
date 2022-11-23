@@ -1,7 +1,9 @@
 const { readdirSync, writeFile } = require("fs");
 const path = require("path");
+const createTagsFromTxt = require('./createTagsFromTxt');
 
 const photosDirectory = path.resolve(__dirname, "..");
+let error = false
 
 const getFoldersList = (source) =>
   readdirSync(source, { withFileTypes: true })
@@ -10,6 +12,8 @@ const getFoldersList = (source) =>
     .filter((name) => name !== "add-metadata" && name !== ".idea");
 
 const folders = getFoldersList(photosDirectory);
+
+
 const dataTemplate = folders.reduce((acc, folder) => {
   const folderPath = path.resolve(__dirname, "..", folder);
   const amountOfPhotos = readdirSync(folderPath).length;
@@ -23,24 +27,39 @@ const dataTemplate = folders.reduce((acc, folder) => {
     if (amountOfPhotos <= 10) return patterns.upTo10;
     if (amountOfPhotos > 10) return patterns.above10;
   })();
-  const [titlesQuantity, descsQuantity, keywordsQuantity] = pattern;
+  const [titlesQuantity, descriptionsQuantity, keywordsQuantity] = pattern;
+  const patternTagsQuantity = {titlesQuantity, descriptionsQuantity, keywordsQuantity}
+  const folderTags = createTagsFromTxt(path.resolve(__dirname, "..", `${folder}.txt`))
+  if(!folderTags) {
+    error = true
+    return
+  }
+  const folderTagsQuantity = {
+    titlesQuantity: folderTags.titles.length,
+    descriptionsQuantity: folderTags.descriptions.length,
+    keywordsQuantity: folderTags.keywords.length,
+  };
+  for (const tag in folderTagsQuantity){
+    if (folderTagsQuantity.tag !== patternTagsQuantity.tag){
+      console.log(`${folder} has ${folderTagsQuantity.tag.replace('Quantity', '')} ${tag}, but must have ${patternTagsQuantity.tag}`)
+    }
+  }
+
   return {
     ...acc,
-    [folder]:
-      amountOfPhotos <= 5
-        ? { titles: [''], descriptions: [''], keywords: [''] }
-        : {
-            titles: new Array(titlesQuantity).fill(''),
-            keywords: new Array(keywordsQuantity).fill(''),
-          },
+    [folder]:folderTags
   };
+
 }, {});
 
-writeFile(
-  "data.js",
-  `const data = ${JSON.stringify(dataTemplate)}; module.exports = data`,
-  function (err) {
-    if (err) throw err;
-    console.log("Saved!");
-  }
-);
+if(!error){
+  writeFile(
+    "data.js",
+    `const data = ${JSON.stringify(dataTemplate)}; module.exports = data`,
+    function (err) {
+      if (err) throw err;
+      console.log("Saved!");
+    }
+  );
+}
+

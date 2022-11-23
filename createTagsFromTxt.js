@@ -1,11 +1,18 @@
 const fs = require('fs');
 
-export const createTagsFromTxt = (pathToTxt)=>{
-  const lines = fs
-    .readFileSync(pathToTxt)
-    .toString()
-    .split('\r\n')
-    .filter((line) => line.length > 5);
+ const createTagsFromTxt = (pathToTxt)=>{
+   let lines;
+   try{
+      lines = fs
+       .readFileSync(pathToTxt)
+       .toString()
+       .split('\r\n')
+       .filter((line) => line.length > 5);
+   } catch(e){
+     console.log(`no such a file ${pathToTxt}`)
+     return
+   }
+
 
   const patternObj = {
     sentences: 0,
@@ -49,3 +56,4 @@ export const createTagsFromTxt = (pathToTxt)=>{
   return folderData;
 }
 
+module.exports = createTagsFromTxt
