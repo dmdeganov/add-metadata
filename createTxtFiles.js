@@ -11,6 +11,8 @@ const getFoldersList = (source) =>
     .filter((name) => name !== 'add-metadata' && name !== '.idea');
 
 const folders = getFoldersList(photosDirectory);
+
+
 for (const folder of folders) {
 
   if (!existsSync(`${photosDirectory}/${folder}.txt`)) {

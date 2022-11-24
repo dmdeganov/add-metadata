@@ -1,18 +1,19 @@
 const fs = require('fs');
 
- const createTagsFromTxt = (pathToTxt)=>{
-   let lines;
-   try{
-      lines = fs
-       .readFileSync(pathToTxt)
-       .toString()
-       .split('\r\n')
-       .filter((line) => line.length > 5);
-   } catch(e){
-     console.log(`no such a file ${pathToTxt}`)
-     return
-   }
-
+const createTagsFromTxt = (pathToTxt) => {
+  let lines;
+  let error;
+  try {
+    lines = fs
+      .readFileSync(pathToTxt)
+      .toString()
+      .split('\r\n')
+      .filter((line) => line.length > 5);
+  } catch (e) {
+    console.log(`no such a file ${pathToTxt}`);
+    error = true;
+    return;
+  }
 
   const patternObj = {
     sentences: 0,
@@ -30,8 +31,10 @@ const fs = require('fs');
     if (obj.sentences === 3) return '332';
     if (obj.sentences === 2 && obj.keywords === 2) return '222';
     if (obj.sentences === 2 && obj.keywords === 1) return '111';
+    error = `unknown pattern in file ${pathToTxt}`;
   };
   const pattern = resolvePattern(patternObj);
+  if (!pattern) return { error };
 
   const initialAcc = { titles: [], descriptions: [], keywords: [] };
 
@@ -43,17 +46,18 @@ const fs = require('fs');
       return acc;
     }
     if (pattern === '222') {
-      if ([0,1].includes(index)) return { ...acc, titles: [...acc.titles, line], descriptions: [...acc.descriptions, line] };
-      if([2,3].includes(index)) return {...acc, keywords: [...acc.keywords, line]}
+      if ([0, 1].includes(index))
+        return { ...acc, titles: [...acc.titles, line], descriptions: [...acc.descriptions, line] };
+      if ([2, 3].includes(index)) return { ...acc, keywords: [...acc.keywords, line] };
     }
     if (pattern === '332') {
-      if ([0,1,2].includes(index)) return { ...acc, titles: [...acc.titles, line], descriptions: [...acc.descriptions, line] };
-      if([3,4].includes(index)) return {...acc, keywords: [...acc.keywords, line]}
+      if ([0, 1, 2].includes(index))
+        return { ...acc, titles: [...acc.titles, line], descriptions: [...acc.descriptions, line] };
+      if ([3, 4].includes(index)) return { ...acc, keywords: [...acc.keywords, line] };
     }
   }, initialAcc);
 
+  return { folderData, error };
+};
 
-  return folderData;
-}
-
-module.exports = createTagsFromTxt
+module.exports = createTagsFromTxt;
