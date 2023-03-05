@@ -9,7 +9,7 @@ const getFoldersList = (source) =>
   readdirSync(source, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
-    .filter((name) => name !== 'add-metadata' && name !== '.idea');
+    .filter((name) => name !== 'add-metadata' && !name.startsWith('.'));
 
 const folders = getFoldersList(photosDirectory);
 folders.forEach((folder) => {
@@ -53,6 +53,18 @@ const dataTemplate =
       descriptionsQuantity: folderTags.descriptions.length,
       keywordsQuantity: folderTags.keywords.length,
     };
+    folderTags.keywords.forEach((keywords, index) => {
+      const keywordsArr=  keywords.split(',').map(keyword => keyword.trim())
+      const keywordsAmount = keywordsArr.length;
+      if (keywordsAmount > 48 || keywordsAmount < 45) {
+        console.log(`!!! folder "${folder}", set ${index + 1}, has ${keywordsAmount} keywords !!!`);
+      }
+      const duplicatedWords = keywordsArr.filter((item, i) => keywordsArr.indexOf(item) !== i);
+      if(duplicatedWords.length){
+        console.log(`!!! folder "${folder}", set ${index + 1}, has duplicated keywords: ${duplicatedWords.join(', ')} !!!`);
+      }
+
+    });
     for (const tag in folderTagsQuantity) {
       if (folderTagsQuantity[tag] !== patternTagsQuantity[tag]) {
         console.log(
@@ -71,10 +83,10 @@ const dataTemplate =
   }, {});
 
 if (!error) {
-  writeFile('data.js', `const data = ${JSON.stringify(dataTemplate)}; module.exports = data`, function (err) {
-    if (err) throw err;
-    console.log('Saved!');
-  });
+  // writeFile('data.js', `const data = ${JSON.stringify(dataTemplate)}; module.exports = data`, function (err) {
+  //   if (err) throw err;
+  //   console.log('Saved!');
+  // });
 } else {
   console.log('files were not changed');
 }
