@@ -4,7 +4,6 @@ const path = require('path');
 const insertWordsToImage = async (pathToImage, toInsert) => {
   const imageMeta = await exiftool.read(pathToImage);
   const { Title, Keywords, Description } = imageMeta;
-  console.log({ Title, Keywords, Description });
   const newTitle = Title.replaceAll('$', toInsert);
   const newDescription = Description.replaceAll('$', toInsert);
   const keywordsToInsert = toInsert.split(' ').join(', ');
